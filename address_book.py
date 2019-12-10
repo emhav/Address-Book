@@ -1,4 +1,3 @@
-import gc
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from pprint import pprint
@@ -18,53 +17,120 @@ all_data = sheet.get_all_records()
 # "pretty print" moduuli muotoilee taulukossa olevan datan helpommin luettavaksi
 pprint(all_data)
 
-# lomake uuden yhteystiedon lisäämiseen
-
 def main():
 
-    answer = input('Do you want to add a new address? ')
+    print("\n1. Add a new address \n2. Find existing address \n3. Delete existing address \n4. Edit existing address")
+    option = input("What do you want to do? (1-4): ")
 
-    if answer == "yes":
+    if option == "1":
         new_address()
-
-    if answer == "no":
-        finding_address()
+    elif option == "2":
+        find_address()
+    elif option == "3":
+        delete_address()
+    elif option == "4":
+        edit_address()
 
 
 def new_address():
 
-    fname = input('First name: ')
-    lname = input('Last name: ')
-    address = input('Address: ')
-    phone = int(input('Phone: '))
+    print("Creating a new address")
+    fname = input("First name: ")
+    lname = input("Last name: ")
+    address = input("Address: ")
+    pcode = input("Postal code: ")
+    city = input("City: ")
+    country = input("Country: ")
 
     # yhdistetään lomakkeen tiedot yhdeksi person muuttujaksi
-    person = [fname,lname,address,phone]
+    person = [fname,lname,address,pcode,city,country]
 
     # alustetaan indeksiksi 2, jolloin lisättäessä sheets taulukkoon yhteystiedot järjestyvät uusimmasta vanhimpaan
     index = 2
     sheet.insert_row(person, index)
-    print('New person and address added successfully')
+    print("A new address added successfully")
 
-def finding_address():
+    cont = input("Do you need to do something else? (y/n): ")
 
-    person = input('Who do you want to find? ')
+    if cont == "y":
+        main()
+    else:
+        print("Goodbye")
 
-    cell = sheet.find(person)
 
-    print('Found something at row %s' % (cell.row))
+def find_address():
+
+    address = input("Address or last name of the person you want to find: ")
+
+    cell = sheet.find(address)
+
+    print("Found an address at row %s" % (cell.row))
     print(sheet.row_values(cell.row))
 
-def deleting_address():
-    person = input('Which person you want to delete? ')
-    cell = sheet.find(person)
-    print('Found something at row %s' % (cell.row))
-    print(sheet.row_values(cell.row))
-    delete_person = input('Do you want to delete this person? (y/n) ')
+    cont = input("Do you need to do something else? (y/n): ")
 
-    if delete_person == 'y':
+    if cont == "y":
+        main()
+    else:
+        print("Goodbye")
+
+
+def delete_address():
+    address = input("Address or last name of the person you want to delete: ")
+    cell = sheet.find(address)
+    print("Found an address at row %s" % (cell.row))
+    print(sheet.row_values(cell.row))
+    delete_addr = input("Do you want to delete this address? (y/n) ")
+
+    if delete_addr == "y":
         sheet.delete_row(cell.row)
-        print('Person and address deleted successfully')
-    elif delete_person == 'n':
-        print("Okay we won't delete that person or address")
+        print("Person and address deleted successfully")
+    elif delete_addr == "n":
+        print("Okay we wont delete this address")
 
+    cont = input("Do you need to do something else? (y/n): ")
+
+    if cont == "y":
+        main()
+    else:
+        print("Goodbye")
+
+def edit_address():
+    address = input("Address or last name of the person you want to edit: ")
+    cell = sheet.find(address)
+    print("Found an address at row %s" % (cell.row))
+    print(sheet.row_values(cell.row))
+
+    new_address = input("Insert a new address: ")
+    sheet.update_cell(cell.row,3,new_address)
+
+    new_pcode = input("Insert a new postal code: ")
+    sheet.update_cell(cell.row,4,new_pcode)
+
+    edit_more = input("Do you need to edit the city? (y/n) ")
+
+    if edit_more == "y":
+        new_city = input("Insert a new city: ")
+        sheet.update_cell(cell.row,5,new_city)
+
+        edit_further = input("Do you need to edit the country? (y/n) ")
+
+        if edit_further == "y":
+            new_country = input("Insert a new country: ")
+            sheet.update_cell(cell.row,6,new_country)
+            print("Updates saved")
+
+        else:
+            print("Updates saved")
+
+    else:
+        print("Updates saved")
+
+    cont = input("Do you need to do something else? (y/n): ")
+
+    if cont == "y":
+        main()
+    else:
+        print("Goodbye")
+
+main()
