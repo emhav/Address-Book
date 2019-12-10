@@ -1,5 +1,8 @@
+# tuodaan gspread kirjasto jotta google sheets api toimii
 import gspread
+# autetikointia varten, credentiaaleissa määritetty owner status jotta käytettävää google sheetsiä pystyy muokkaamaan
 from oauth2client.service_account import ServiceAccountCredentials
+#pretty print datan muotoilemista varten
 from pprint import pprint
 
 
@@ -17,6 +20,7 @@ all_data = sheet.get_all_records()
 # "pretty print" moduuli muotoilee taulukossa olevan datan helpommin luettavaksi
 pprint(all_data)
 
+#main funktio joka kutsuu muita funktioita käyttötarpeen mukaan
 def main():
 
     print("\n1. Add a new address \n2. Find existing address \n3. Delete existing address \n4. Edit existing address")
@@ -31,7 +35,7 @@ def main():
     elif option == "4":
         edit_address()
 
-
+# funktio uuden oisoitteen lisäämiseksi
 def new_address():
 
     print("Creating a new address")
@@ -50,6 +54,7 @@ def new_address():
     sheet.insert_row(person, index)
     print("A new address added successfully")
 
+    # käyttäjällä mahdollisuus joko lopettaa ohjelma tai jatkaa käyttöä
     cont = input("Do you need to do something else? (y/n): ")
 
     if cont == "y":
@@ -57,13 +62,13 @@ def new_address():
     else:
         print("Goodbye")
 
-
+# funktio tietyn osoitteen löytämiseksi
 def find_address():
 
     address = input("Address or last name of the person you want to find: ")
-
+    # etsii solun mistä haluttu tieto löytyy
     cell = sheet.find(address)
-
+    #kertoo miltä riviltä etsitty osoite löytyy + tulostaa rivin datan kokonaisuudessaan
     print("Found an address at row %s" % (cell.row))
     print(sheet.row_values(cell.row))
 
@@ -74,15 +79,19 @@ def find_address():
     else:
         print("Goodbye")
 
-
+# funktio tietyn osoitteen poistamiseksi
 def delete_address():
+
     address = input("Address or last name of the person you want to delete: ")
     cell = sheet.find(address)
     print("Found an address at row %s" % (cell.row))
     print(sheet.row_values(cell.row))
+
     delete_addr = input("Do you want to delete this address? (y/n) ")
 
+    #poistetaan tai säilytetään osoite
     if delete_addr == "y":
+        #poisaa kokonaan rivin josta haluttu nimi/osite löytyi
         sheet.delete_row(cell.row)
         print("Person and address deleted successfully")
     elif delete_addr == "n":
@@ -95,18 +104,23 @@ def delete_address():
     else:
         print("Goodbye")
 
+# funktio tietyn osoitteen muokkaamiseen
 def edit_address():
+
     address = input("Address or last name of the person you want to edit: ")
     cell = sheet.find(address)
     print("Found an address at row %s" % (cell.row))
     print(sheet.row_values(cell.row))
 
+    # uuden ositteen lisäys
     new_address = input("Insert a new address: ")
+    # päivittää tietyn solun annetulla arvolla
     sheet.update_cell(cell.row,3,new_address)
 
     new_pcode = input("Insert a new postal code: ")
     sheet.update_cell(cell.row,4,new_pcode)
 
+    #tarvittaessa pystyy myös muuttamaan tietyn ositteen kaupungin ja maan
     edit_more = input("Do you need to edit the city? (y/n) ")
 
     if edit_more == "y":
